@@ -1,5 +1,9 @@
 The interface of the player is self explanatory
 
+Running the player
+-----------------------------------------------------
+cd to the sleek player directory and then run "guibuilder.py"
+
 Some points to note
 -----------------------------------
 1.) If some audio file is playing and you want to play another file,in that case you have to stop the currently playing file then select new file and press play
