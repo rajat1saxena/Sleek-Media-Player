@@ -2,7 +2,7 @@ The interface of the player is self explanatory
 
 Running the player
 -----------------------------------------------------
-cd to the sleek player directory and then run "guibuilder.py"
+cd to the sleek player directory and then run "guibuild.py"
 
 Some points to note
 -----------------------------------
