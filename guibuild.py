@@ -23,6 +23,8 @@ import pygtk
 pygtk.require("2.0")
 import gtk,gobject
 import gtk.glade
+import playlist_reader
+import re
 
 class guibuild:
     #convert time - into readable form
@@ -76,7 +78,7 @@ class guibuild:
             minutes1=timelist1[1]
             seconds1=timelist1[2]
             totaltime1=(int(hours1)*3600+int(minutes1)*60+int(seconds1))
-            print(totaltime1)
+            #print(totaltime1)
 
             #some logic for solving time format-for current position
             timelist2=self.current_position.split(":")
@@ -84,27 +86,50 @@ class guibuild:
             minutes2=timelist2[1]
             seconds2=timelist2[2]
             totaltime2=(int(hours2)*3600+int(minutes2)*60+int(seconds2))
-            print(totaltime2)
+            #print(totaltime2)
             
             self.adj.set_upper(totaltime1)
             self.adj.set_value(totaltime2)
-            print(str(self.duration))
+            #if totaltime1==totaltime2:
+             #   self.on_stop(self.stop)
+            #print(str(self.duration))
             return True
        
     #callback for BUS messages
     def on_message(self,bus,message):
         if message.type==gst.MESSAGE_EOS:
-            self.adj.set_value(0)
-            self.myplay.set_state(gst.STATE_NULL)
+            print("end reached")
+            if re.search(".pls$",self.originalfile):
+                if self.playlist_pointer==len(self.tracklist)-1:
+                    self.on_stop(self.stop)
+                else:
+                    self.on_next(self.next)
+            else:
+                self.on_stop(self.stop)
         elif message.type==gst.MESSAGE_ERROR:
-            self.myplay.set_state(gst.STATE_NULL)
+            self.mypipe.set_state(gst.STATE_NULL)
             (err,debug)=message.parse_error()
             print("Error: %s"%err,debug)
+
+    #A playlist_manager function to manage play of playlist
+    def playlist_manager(self):
+        #self.no_of_entries=len(self.tracklist)
+        print("Successfull arrival at playlist_manager")
+        self.mediafile=self.tracklist[self.playlist_pointer]
             
     # media control callbacks for play,pause and stop buttons      
     def on_play(self,widget):
-        self.mediafile=self.open.get_filename()
-        self.mediafile="file://"+self.mediafile
+        self.originalfile=self.open.get_filename()
+        
+        #Playlist logic
+        if re.search(".pls$",self.originalfile):
+            print("It's a playlist file")
+            self.tracklist=playlist_reader.reader(self.originalfile).returner()
+            print(self.tracklist)
+            self.playlist_manager() #call to playlist_manager()
+        else:
+            self.mediafile="file://"+self.originalfile
+
         print(self.mediafile)
         self.win.set_title(self.mediafile)
         self.myplay.set_property("uri",self.mediafile)
@@ -127,19 +152,44 @@ class guibuild:
         
     #key press event detector
     def key_press(self,widget,event):
-        print("Key Code: "+str(event.keyval))
+        #print("Key Code: "+str(event.keyval))
         if event.keyval==111:                #the key 'o'
             self.on_pause(self.pause)
         if event.keyval==112:                #the key 'p'
             self.on_play(self.play)
         if event.keyval==105:                 #the key 'i'
             self.on_stop(self.stop)
+        if event.keyval==108:                 #the key 'l'
+            self.on_next(self.next)
+        if event.keyval==107:                 #the key 'k'
+            self.on_prev(self.previous)
+            
+    #callbacks for previous and next buttons
+    def on_prev(self,widget):
+        if self.playlist_pointer==0:
+            pass
+        else:
+            self.playlist_pointer=self.playlist_pointer-1
+            self.on_stop(self.stop)
+            self.on_play(self.play)
+
+    def on_next(self,widget):
+        if self.playlist_pointer==len(self.tracklist)-1:
+            pass
+        else:
+            self.playlist_pointer=self.playlist_pointer+1
+            self.on_stop(self.stop)
+            self.on_play(self.play)
+
 
     # Initialiser function-Manages the gui,bus and gstreamer       
     def __init__(self):
         self.filename="./interface2.glade"
         self.builder=gtk.Builder()
         self.builder.add_from_file(self.filename)
+
+        #initializing playlist pointer
+        self.playlist_pointer=0
 
         #getting objects
         self.win=self.builder.get_object("mainwin")
@@ -148,6 +198,8 @@ class guibuild:
         self.pause=self.builder.get_object("pause")
         self.stop=self.builder.get_object("stop")
         self.open=self.builder.get_object("open")
+        self.previous=self.builder.get_object("previous")
+        self.next=self.builder.get_object("next")
         self.video=self.builder.get_object("drawarea")
         self.volume=self.builder.get_object("appvolume")
         self.controltable=self.builder.get_object("sevotable")
@@ -186,6 +238,8 @@ class guibuild:
         self.play.connect("clicked",self.on_play)
         self.pause.connect("clicked",self.on_pause)
         self.stop.connect("clicked",self.on_stop)
+        self.previous.connect("clicked",self.on_prev)
+        self.next.connect("clicked",self.on_next)
 
         #setting filechooser button's properties
         self.open.set_current_folder("/home")
@@ -197,10 +251,9 @@ class guibuild:
         self.mysink.set_property('force-aspect-ratio',True)
         self.myplay.set_property('video-sink',self.mysink)
         self.mypipe.add(self.myplay)
-        self.bus=self.myplay.get_bus()
+        self.bus=self.mypipe.get_bus()
         self.bus.add_signal_watch()
         self.bus.connect("message",self.on_message)
-
         
         #settings related to timer        
         self.playflag=False                                        #this will be used to represent state of player

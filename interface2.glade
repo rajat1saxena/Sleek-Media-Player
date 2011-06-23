@@ -11,6 +11,7 @@
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Sleek Media Player</property>
     <property name="window_position">center</property>
+    <property name="icon">icon.png</property>
     <child>
       <object class="GtkVPaned" id="vpane">
         <property name="visible">True</property>
@@ -21,6 +22,7 @@
         <child>
           <object class="GtkDrawingArea" id="drawarea">
             <property name="visible">True</property>
+            <property name="app_paintable">True</property>
             <property name="can_focus">False</property>
           </object>
           <packing>
@@ -86,13 +88,27 @@ audio-volume-medium</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="spacing">5</property>
-                    <property name="title" translatable="yes">Select An Audio File</property>
+                    <property name="title" translatable="yes">Select A Media File</property>
                     <property name="width_chars">1</property>
                   </object>
                   <packing>
                     <property name="expand">True</property>
                     <property name="fill">True</property>
                     <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="previous">
+                    <property name="label" translatable="yes">Previous</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="use_action_appearance">False</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
                   </packing>
                 </child>
                 <child>
@@ -135,6 +151,20 @@ audio-volume-medium</property>
                     <property name="expand">True</property>
                     <property name="fill">True</property>
                     <property name="position">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="next">
+                    <property name="label" translatable="yes">Next</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                    <property name="use_action_appearance">False</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">5</property>
                   </packing>
                 </child>
               </object>
