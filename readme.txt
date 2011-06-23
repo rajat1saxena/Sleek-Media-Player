@@ -11,6 +11,13 @@ Features
 3. It supports seek,navigation and basic play,pause and stop features
 4. It supports shoutcast playlist(".pls").So you can play your totem playlists with this player
 
+Keyboard Shortcuts
+---------------------------------------------------------
+key 'p'-plays the current track
+key 'o'-pauses the current track
+key 'i'-stops the current track
+key 'l'-next song
+key 'k'-previous song
 
 Some points to note
 -----------------------------------
